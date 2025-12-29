@@ -19,6 +19,7 @@ class StringValidator(Validator):
 
         if not isinstance(data, str):
             errors.append({"message": "Data is not a string", "path": path, "line": line})
+            logging.info("\nData is not a string\n")
             return {"valid": False, "errors": errors}
 
         if "minLength" in schema and len(data) < schema["minLength"]:
