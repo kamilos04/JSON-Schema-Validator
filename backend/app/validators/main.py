@@ -1,25 +1,20 @@
 from typing import Any, Dict, List
 
-from backend.app.validators.arrays import ArrayValidator
-from backend.app.validators.logic import LogicValidator
-from backend.app.validators.numbers import NumberValidator
-from backend.app.validators.objects import ObjectValidator
-from backend.app.validators.strings import StringValidator
-from backend.app.validators.types import TypeValidator
+from backend.app.types import Result
 
 
 class JSONValidator:
 
-    def __init__(self):
-        self.type_validator = TypeValidator()
-        self.object_validator = ObjectValidator()
-        self.array_validator = ArrayValidator()
-        self.string_validator = StringValidator()
-        self.number_validator = NumberValidator()
-        self.logic_validator = LogicValidator()
+    def __init__(self, type_validator, object_validator, array_validator, string_validator, number_validator, logic_validator):
+        self.type_validator = type_validator
+        self.object_validator = object_validator
+        self.array_validator = array_validator
+        self.string_validator = string_validator
+        self.number_validator = number_validator
+        self.logic_validator = logic_validator
 
 
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Dict:
+    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
         type_result = self.type_validator.validate(data, schema, path, line)
         if not type_result["valid"]:
             return type_result
@@ -31,7 +26,7 @@ class JSONValidator:
             base_result = self.array_validator.validate(data, schema, path, line)
         elif schema_type == "string":
             base_result = self.string_validator.validate(data, schema, path, line)
-        elif schema_type == "number":
+        elif schema_type in ["integer", "number"]:
             base_result = self.number_validator.validate(data, schema, path, line)
         else:
             base_result = {"valid": True, "errors": []}
