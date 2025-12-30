@@ -5,10 +5,42 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
+function safeJsonParse(text) {
+  try {
+    const parsed = JSON.parse(text)
+    return { ok: true, value: parsed }
+  } catch (e) {
+    return { ok: false, message: e?.message ?? "Invalid JSON" }
+  }
+}
+
 export default function App() {
   const [schema, setSchema] = useState("")
   const [data, setData] = useState("")
   const [errors, setErrors] = useState([])
+
+  const handleValidate = () => {
+    const nextErrors = []
+
+    if (!schema.trim()) {
+      nextErrors.push({ path: "schema", message: "Schema is empty" })
+    }
+    if (!data.trim()) {
+      nextErrors.push({ path: "data", message: "Data is empty" })
+    }
+
+    if (schema.trim()) {
+      const s = safeJsonParse(schema)
+      if (!s.ok) nextErrors.push({ path: "schema", message: s.message })
+    }
+
+    if (data.trim()) {
+      const d = safeJsonParse(data)
+      if (!d.ok) nextErrors.push({ path: "data", message: d.message })
+    }
+
+    setErrors(nextErrors)
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 p-8">
@@ -38,15 +70,7 @@ export default function App() {
             />
           </div>
 
-          <Button
-            className="w-full"
-            onClick={() =>
-              setErrors([
-                { path: "/name", message: "should be string" },
-                { path: "/age", message: "should be >= 18" },
-              ])
-            }
-          >
+          <Button className="w-full" onClick={handleValidate}>
             Validate
           </Button>
 
@@ -62,6 +86,13 @@ export default function App() {
                   ))}
                 </ul>
               </AlertDescription>
+            </Alert>
+          )}
+
+          {errors.length === 0 && schema.trim() && data.trim() && (
+            <Alert>
+              <AlertTitle>OK</AlertTitle>
+              <AlertDescription>Both inputs are valid JSON.</AlertDescription>
             </Alert>
           )}
         </CardContent>
