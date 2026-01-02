@@ -1,14 +1,14 @@
 from typing import Any, Dict, List
 
+from backend.app.types import Result
 from backend.app.validators.base import Validator
-from backend.app.validators.main import JSONValidator
 
 
 class LogicValidator(Validator):
-    def __init__(self):
-        self.json_validator = JSONValidator()
+    def __init__(self, json_validator):
+        self.json_validator = json_validator
 
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0):
+    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
         errors: List[Dict] = []
 
         if "allOf" in schema:
