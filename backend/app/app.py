@@ -1,26 +1,26 @@
+import json
+
 from backend.app.dependencies import json_validator
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
-# Test
-schema = {
-  "type": "object",
-  "required": ["name", "age"],
-  "minProperties": 3,
-  "maxProperties": 3,
-  "properties": {
-    "name": { "type": "string", "minLength": 4, "maxLength": 7 },
-    "age": { "type": "integer" }
-  }
-}
-
-json_data = {
-  "name": 'Ka',
-  "age": 21,
-  "test": 1,
-  "test2": 2
-}
+app = FastAPI()
 
 
+class JSONAndSchemaRequest(BaseModel):
+    json_data: str = Field(..., alias="json")
+    schema_data: str = Field(..., alias="schema")
 
-json_result = json_validator.validate(json_data, schema, "")
-print(json_result)
+@app.post("/validate")
+def validate(request: JSONAndSchemaRequest):
+    json_dict = json.loads(request.json_data)
+    schema_dict = json.loads(request.schema_data)
+
+    return json_validator.validate(json_dict, schema_dict, "")
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
 
