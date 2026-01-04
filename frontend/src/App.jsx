@@ -18,28 +18,71 @@ export default function App() {
   const [schema, setSchema] = useState("")
   const [data, setData] = useState("")
   const [errors, setErrors] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [valid, setValid] = useState(null)
+  const [apiError, setApiError] = useState("")
 
-  const handleValidate = () => {
+  const handleValidate = async () => {
+    setApiError("")
+    setValid(null)
+
     const nextErrors = []
 
-    if (!schema.trim()) {
-      nextErrors.push({ path: "schema", message: "Schema is empty" })
-    }
-    if (!data.trim()) {
-      nextErrors.push({ path: "data", message: "Data is empty" })
+    if (!schema.trim()) nextErrors.push({ path: "schema", message: "Schema is empty" })
+    if (!data.trim()) nextErrors.push({ path: "data", message: "Data is empty" })
+
+    const s = schema.trim() ? safeJsonParse(schema) : null
+    const d = data.trim() ? safeJsonParse(data) : null
+
+    if (s && !s.ok) nextErrors.push({ path: "schema", message: s.message })
+    if (d && !d.ok) nextErrors.push({ path: "data", message: d.message })
+
+    if (nextErrors.length > 0) {
+      setErrors(nextErrors)
+      return
     }
 
-    if (schema.trim()) {
-      const s = safeJsonParse(schema)
-      if (!s.ok) nextErrors.push({ path: "schema", message: s.message })
-    }
+    setLoading(true)
+    setErrors([])
 
-    if (data.trim()) {
-      const d = safeJsonParse(data)
-      if (!d.ok) nextErrors.push({ path: "data", message: d.message })
-    }
+    try {
+      const res = await fetch("api/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
 
-    setErrors(nextErrors)
+        body: JSON.stringify({
+          json: JSON.stringify(d.value),
+          schema: JSON.stringify(s.value),
+        }),
+      })
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "")
+        throw new Error(`HTTP ${res.status}. ${text}`)
+      }
+
+      const result = await res.json()
+
+      setValid(!!result.valid)
+
+      if (result.valid) {
+        setErrors([])
+      } else {
+        const apiErrors = Array.isArray(result.errors)
+          ? result.errors.map((e) => ({
+              path: e.path ?? "",
+              message: e.message ?? "Validation error",
+              line: e.line,
+            }))
+          : [{ path: "", message: "Unknown validation error" }]
+
+        setErrors(apiErrors)
+      }
+    } catch (e) {
+      setApiError(e?.message ?? "Network error")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -70,9 +113,16 @@ export default function App() {
             />
           </div>
 
-          <Button className="w-full" onClick={handleValidate}>
-            Validate
+          <Button className="w-full" onClick={handleValidate} disabled={loading}>
+            {loading ? "Validating..." : "Validate"}
           </Button>
+
+          {apiError && (
+            <Alert variant="destructive">
+              <AlertTitle>API error</AlertTitle>
+              <AlertDescription>{apiError}</AlertDescription>
+            </Alert>
+          )}
 
           {errors.length > 0 && (
             <Alert variant="destructive">
@@ -81,7 +131,8 @@ export default function App() {
                 <ul className="list-disc pl-5">
                   {errors.map((err, i) => (
                     <li key={i}>
-                      <strong>{err.path}</strong>: {err.message}
+                      <strong>{err.path || "(root)"}</strong>: {err.message}
+                      {typeof err.line === "number" ? ` (line: ${err.line})` : ""}
                     </li>
                   ))}
                 </ul>
@@ -89,10 +140,10 @@ export default function App() {
             </Alert>
           )}
 
-          {errors.length === 0 && schema.trim() && data.trim() && (
+          {valid === true && (
             <Alert>
               <AlertTitle>OK</AlertTitle>
-              <AlertDescription>Both inputs are valid JSON.</AlertDescription>
+              <AlertDescription>JSON is valid against schema.</AlertDescription>
             </Alert>
           )}
         </CardContent>
