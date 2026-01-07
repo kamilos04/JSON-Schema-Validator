@@ -1,9 +1,9 @@
 import { useState } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import Editor from "@monaco-editor/react"
 
 function safeJsonParse(text) {
   try {
@@ -46,10 +46,9 @@ export default function App() {
     setErrors([])
 
     try {
-      const res = await fetch("api/validate", {
+      const res = await fetch("/api/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-
         body: JSON.stringify({
           json: JSON.stringify(d.value),
           schema: JSON.stringify(s.value),
@@ -95,21 +94,23 @@ export default function App() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>JSON Schema</Label>
-            <Textarea
-              rows={8}
-              placeholder="Wklej JSON Schema..."
+            <Editor
+              height="200px"
+              language="json"
               value={schema}
-              onChange={(e) => setSchema(e.target.value)}
+              onChange={(v) => setSchema(v ?? "")}
+              options={{ minimap: { enabled: false } }}
             />
           </div>
 
           <div className="space-y-2">
             <Label>JSON Data</Label>
-            <Textarea
-              rows={8}
-              placeholder="Wklej JSON do walidacji..."
+            <Editor
+              height="200px"
+              language="json"
               value={data}
-              onChange={(e) => setData(e.target.value)}
+              onChange={(v) => setData(v ?? "")}
+              options={{ minimap: { enabled: false } }}
             />
           </div>
 
