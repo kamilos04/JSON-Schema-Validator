@@ -37,7 +37,7 @@ class TestNumberValidator(unittest.TestCase):
         result = self.validator.validate(data, schema, self.path, self.line)
         self.assertFalse(result["valid"])
         self.assertEqual(len(result["errors"]), 1)
-        self.assertIn("Number 2 is smaller than minimum 5", result["errors"][0]["message"])
+        self.assertIn("Number (2) is smaller than minimum (5)", result["errors"][0]["message"])
 
     def test_maximum_violation(self):
         schema = {"maximum": 5}
@@ -45,7 +45,7 @@ class TestNumberValidator(unittest.TestCase):
         result = self.validator.validate(data, schema, self.path, self.line)
         self.assertFalse(result["valid"])
         self.assertEqual(len(result["errors"]), 1)
-        self.assertIn("Number 6 is bigger than maximum 5", result["errors"][0]["message"])
+        self.assertIn("Number (6) is bigger than maximum (5)", result["errors"][0]["message"])
 
     def test_exclusive_minimum_violation(self):
         schema = {"exclusiveMinimum": 1}
@@ -53,7 +53,7 @@ class TestNumberValidator(unittest.TestCase):
         result = self.validator.validate(data, schema, self.path, self.line)
         self.assertFalse(result["valid"])
         self.assertEqual(len(result["errors"]), 1)
-        self.assertIn("Number 1 is smaller or equal than exclusiveMinimum 1", result["errors"][0]["message"])
+        self.assertIn("Number (1) is smaller or equal than exclusiveMinimum (1)", result["errors"][0]["message"])
 
     def test_exclusive_maximum_violation(self):
         schema = {"exclusiveMaximum": 10}
@@ -61,7 +61,7 @@ class TestNumberValidator(unittest.TestCase):
         result = self.validator.validate(data, schema, self.path, self.line)
         self.assertFalse(result["valid"])
         self.assertEqual(len(result["errors"]), 1)
-        self.assertIn("Number 10 is bigger or equal than exclusiveMaximum 10", result["errors"][0]["message"])
+        self.assertIn("Number (10) is bigger or equal than exclusiveMaximum (10)", result["errors"][0]["message"])
 
     def test_multiple_of_violation(self):
         schema = {"multipleOf": 2}
@@ -69,7 +69,7 @@ class TestNumberValidator(unittest.TestCase):
         result = self.validator.validate(data, schema, self.path, self.line)
         self.assertFalse(result["valid"])
         self.assertEqual(len(result["errors"]), 1)
-        self.assertIn("Number 13 is not a multipleOf 2", result["errors"][0]["message"])
+        self.assertIn("Number (13) is not a multipleOf (2)", result["errors"][0]["message"])
 
     def test_multiple_violations(self):
         schema = {"minimum": 10, "exclusiveMaximum": 3, "multipleOf": 2}
