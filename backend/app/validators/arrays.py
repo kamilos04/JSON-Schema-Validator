@@ -21,7 +21,12 @@ class ArrayValidator(Validator):
             return {"valid": False, "errors": errors}
 
         if "items" in schema:
-            pass
+            item_schema = schema["items"]
+
+            for index, item in enumerate(data):
+                result = self.json_validator.validate(data=item, schema=item_schema, path=f"{path}[{index}]", line=line)
+                if not result["valid"]:
+                    errors.extend(result["errors"])
 
         if "minItems" in schema and len(data) < schema["minItems"]:
             errors.append({

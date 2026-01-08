@@ -22,15 +22,14 @@ class TestArrayValidator(unittest.TestCase):
         self.assertEqual(len(result["errors"]), 1)
         self.assertIn("Data is not an array", result["errors"][0]["message"])
 
-    """
     def test_items_violation(self):
-        schema = {}
-        data = []
+        schema = { "items": { "type": "number" }}
+        data = ["abc"]
         result = self.validator.validate(data, schema, self.path, self.line)
         self.assertFalse(result["valid"])
         self.assertEqual(len(result["errors"]), 1)
         self.assertIn("", result["errors"][0]["message"])
-    """
+
     def test_minItems_violation(self):
         schema = {"minItems" : 3}
         data = [1,"abc"]
