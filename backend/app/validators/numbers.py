@@ -19,41 +19,45 @@ class NumberValidator(Validator):
 
 
         if not isinstance(data, (int, float)) or isinstance(data, bool) or not math.isfinite(data):
-            errors.append({"message": "Data is not a valid finite number", "path": path, "line": line})
+            errors.append({
+                "message": "Data is not a valid finite number",
+                "path": path,
+                "line": line
+            })
             return {"valid": False, "errors": errors}
 
         if "minimum" in schema and data < schema["minimum"]:
             errors.append({
                 "message": f"Number ({data}) is smaller than minimum ({schema['minimum']})",
-                "path": path,
+                "path": path+"/minimum",
                 "line": line
             })
 
         if "maximum" in schema and data > schema["maximum"]:
             errors.append({
                 "message": f"Number ({data}) is bigger than maximum ({schema['maximum']})",
-                "path": path,
+                "path": path+"/maximum",
                 "line": line
             })
 
         if "exclusiveMinimum" in schema and data <= schema["exclusiveMinimum"]:
             errors.append({
                 "message": f"Number ({data}) is smaller or equal than exclusiveMinimum ({schema['exclusiveMinimum']})",
-                "path": path,
+                "path": path+"/exclusiveMinimum",
                 "line": line
             })
 
         if "exclusiveMaximum" in schema and data >= schema["exclusiveMaximum"]:
             errors.append({
                 "message": f"Number ({data}) is bigger or equal than exclusiveMaximum ({schema['exclusiveMaximum']})",
-                "path": path,
+                "path": path+"/exclusiveMaximum",
                 "line": line
             })
 
         if "multipleOf" in schema and data % schema["multipleOf"] != 0:
             errors.append({
                 "message": f"Number ({data}) is not a multipleOf ({schema['multipleOf']})",
-                "path": path,
+                "path": path+"/multipleOf",
                 "line": line
             })
 
