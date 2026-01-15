@@ -18,22 +18,36 @@ class StringValidator(Validator):
         errors: List[Dict] = []
 
         if not isinstance(data, str):
-            errors.append({"message": "Data is not a string", "path": path, "line": line})
+            errors.append({
+                "message": "Data is not a string",
+                "path": path,
+                "line": line
+            })
             logging.info("\nData is not a string\n")
             return {"valid": False, "errors": errors}
 
         if "minLength" in schema and len(data) < schema["minLength"]:
-            errors.append({"message": f"String length {len(data)} < minLength {schema['minLength']}", "path": path, "line": line})
-            logging.info(f"\nString length {len(data)} < minLength {schema['minLength']}\n")
+            errors.append({
+                "message": f"String length ({len(data)}) < minLength ({schema['minLength']})",
+                "path": path+"/minLength",
+                "line": line
+            })
+            logging.info(f"\nString length ({len(data)}) < minLength ({schema['minLength']})\n")
 
         if "maxLength" in schema and len(data) > schema["maxLength"]:
-            errors.append(
-                {"message": f"String length {len(data)} > maxLength {schema['maxLength']}", "path": path, "line": line})
-            logging.info(f"\nString length {len(data)} > maxLength {schema['maxLength']}\n")
+            errors.append({
+                "message": f"String length ({len(data)}) > maxLength ({schema['maxLength']})",
+                "path": path+"/maxLength",
+                "line": line
+            })
+            logging.info(f"\nString length ({len(data)}) > maxLength ({schema['maxLength']})\n")
 
         if "pattern" in schema and not re.match(schema["pattern"], data):
-            errors.append(
-                {"message": f"String {data} does not match pattern {schema['pattern']}", "path": path, "line": line})
-            logging.info(f"\nString {data} does not match pattern {schema['pattern']}\n")
+            errors.append({
+                "message": f"String '{data}' does not match pattern {schema['pattern']}",
+                "path": path+"/pattern",
+                "line": line
+            })
+            logging.info(f"\nString '{data}' does not match pattern {schema['pattern']}\n")
 
         return {"valid": not errors, "errors": errors}
