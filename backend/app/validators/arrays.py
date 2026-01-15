@@ -31,14 +31,14 @@ class ArrayValidator(Validator):
         if "minItems" in schema and len(data) < schema["minItems"]:
             errors.append({
                 "message": f"Array length ({len(data)}) is smaller than minItems ({schema['minItems']})",
-                "path": path,
+                "path": path+"/minItems",
                 "line": line
             })
 
         if "maxItems" in schema and len(data) > schema["maxItems"]:
             errors.append({
                 "message": f"Array length ({len(data)}) is bigger than maxItems ({schema['maxItems']})",
-                "path": path,
+                "path": path+"/maxItems",
                 "line": line
             })
 
