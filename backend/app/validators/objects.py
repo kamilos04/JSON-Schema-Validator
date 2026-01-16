@@ -59,5 +59,20 @@ class ObjectValidator(Validator):
                 result = self.json_validator.validate(data[key], subschema, path+f"/properties/{key}", path_json+f"/{key}", json_map)
                 errors += result["errors"]
 
+        additional_properties = schema.get("additionalProperties", True)
+        if additional_properties is not True:
+            extra_keys = [key for key in data if key not in properties]
+            
+            if additional_properties is False:
+                for key in extra_keys:
+                    errors.append({
+                        "message": f"Additional property '{key}' is not allowed",
+                        "path": path+"/additionalProperties",
+                        "line": self.get_line(json_map, path_json+f"/{key}")
+                    })
+            elif isinstance(additional_properties, dict):
+                for key in extra_keys:
+                    result = self.json_validator.validate(data[key], additional_properties, path+"/additionalProperties", path_json+f"/{key}", json_map)
+                    errors += result["errors"]
 
         return {"valid": not errors, "errors": errors}

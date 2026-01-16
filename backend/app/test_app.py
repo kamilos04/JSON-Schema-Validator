@@ -30,6 +30,18 @@ schema = """
         "type": "string",
         "minLength": 3
       }
+    },
+    "city": {
+      "type": "object",
+      "required": [
+        "country"
+        ],
+      "properties": {
+        "country": {
+          "type": "string"    
+        }
+      },
+      "additionalProperties": { "type": "number" }
     }
   }
 }
@@ -40,6 +52,9 @@ json_data = """
   "name": "Ka",
   "age": 11,
   "hobbies": ["ai","bc"],
+  "city": {
+    "country": "test",
+    "test2": "f"},
   "test": 1
 }
 """
@@ -74,4 +89,3 @@ json_dict = json.loads(json_data)
 schema_dict = json.loads(schema)
 json_map = calculate(json_data)
 print(json_validator.validate(json_dict, schema_dict, "#", "", json_map))
-
