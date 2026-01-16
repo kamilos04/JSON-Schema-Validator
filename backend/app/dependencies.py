@@ -14,7 +14,7 @@ json_validator = JSONValidator(None, None, None, None, None, None)
 
 type_validator = TypeValidator()
 object_validator = ObjectValidator(json_validator)
-array_validator = ArrayValidator()
+array_validator = ArrayValidator(json_validator)
 string_validator = StringValidator()
 number_validator = NumberValidator()
 logic_validator = LogicValidator(json_validator)
