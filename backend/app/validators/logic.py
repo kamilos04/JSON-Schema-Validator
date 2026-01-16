@@ -8,7 +8,7 @@ class LogicValidator(Validator):
     def __init__(self, json_validator):
         self.json_validator = json_validator
 
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
+    def validate(self, data: Any, schema: Dict, path: str, path_json: str, json_map) -> Result:
         errors: List[Dict] = []
 
         if "allOf" in schema:
