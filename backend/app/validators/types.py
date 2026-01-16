@@ -57,14 +57,14 @@ class TypeValidator(Validator):
                 errors.append({
                     "message": "Data does not match any of the allowed types",
                     "path": path+"/type",
-                    "line": self.get_line(json_map, path_json, True)
+                    "line": self.get_line(json_map, path_json)
                 })
         if "enum" in schema:
             if not any(item == data and type(item) is type(data) for item in schema["enum"]):
                 errors.append({
                     "message": "Data does not match any of the enum values",
                     "path": path+"/enum",
-                    "line": self.get_line(json_map, path_json, True)
+                    "line": self.get_line(json_map, path_json)
                 })
 
         if "const" in schema:
@@ -72,7 +72,7 @@ class TypeValidator(Validator):
                 errors.append({
                     "message": "Data does not match the const value",
                     "path": path+"/const",
-                    "line": self.get_line(json_map, path_json, True)
+                    "line": self.get_line(json_map, path_json)
                 })
 
         return {"valid": not errors, "errors": errors}

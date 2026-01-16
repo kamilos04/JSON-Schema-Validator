@@ -23,7 +23,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": "Data is not a string",
                 "path": path,
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
             logging.info("\nData is not a string\n")
             return {"valid": False, "errors": errors}
@@ -32,7 +32,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": f"String length ({len(data)}) < minLength ({schema['minLength']})",
                 "path": path+"/minLength",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
             logging.info(f"\nString length ({len(data)}) < minLength ({schema['minLength']})\n")
 
@@ -40,7 +40,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": f"String length ({len(data)}) > maxLength ({schema['maxLength']})",
                 "path": path+"/maxLength",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
             logging.info(f"\nString length ({len(data)}) > maxLength ({schema['maxLength']})\n")
 
@@ -48,7 +48,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": f"String '{data}' does not match pattern {schema['pattern']}",
                 "path": path+"/pattern",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
             logging.info(f"\nString '{data}' does not match pattern {schema['pattern']}\n")
 

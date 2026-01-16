@@ -24,7 +24,7 @@ class NumberValidator(Validator):
             errors.append({
                 "message": "Data is not a valid finite number",
                 "path": path,
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
             return {"valid": False, "errors": errors}
 
@@ -32,35 +32,35 @@ class NumberValidator(Validator):
             errors.append({
                 "message": f"Number ({data}) is smaller than minimum ({schema['minimum']})",
                 "path": path+"/minimum",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         if "maximum" in schema and data > schema["maximum"]:
             errors.append({
                 "message": f"Number ({data}) is bigger than maximum ({schema['maximum']})",
                 "path": path+"/maximum",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         if "exclusiveMinimum" in schema and data <= schema["exclusiveMinimum"]:
             errors.append({
                 "message": f"Number ({data}) is smaller or equal than exclusiveMinimum ({schema['exclusiveMinimum']})",
                 "path": path+"/exclusiveMinimum",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         if "exclusiveMaximum" in schema and data >= schema["exclusiveMaximum"]:
             errors.append({
                 "message": f"Number ({data}) is bigger or equal than exclusiveMaximum ({schema['exclusiveMaximum']})",
                 "path": path+"/exclusiveMaximum",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         if "multipleOf" in schema and data % schema["multipleOf"] != 0:
             errors.append({
                 "message": f"Number ({data}) is not a multipleOf ({schema['multipleOf']})",
                 "path": path+"/multipleOf",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         return {"valid": not errors, "errors": errors}

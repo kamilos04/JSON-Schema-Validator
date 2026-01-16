@@ -8,10 +8,11 @@ schema = """
   "type": "object",
   "required": [
     "name",
-    "age"
+    "age",
+    "hobbies"
   ],
   "minProperties": 3,
-  "maxProperties": 3,
+  "maxProperties": 4,
   "properties": {
     "name": {
       "type": "string",
@@ -21,6 +22,14 @@ schema = """
     "age": {
       "type": "integer",
       "minimum": 12
+    },
+    "hobbies": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
     }
   }
 }
@@ -30,8 +39,8 @@ json_data = """
 {
   "name": "Ka",
   "age": 11,
-  "test": 1,
-  "test2": 2
+  "hobbies": ["ai","bc"],
+  "test": 1
 }
 """
 

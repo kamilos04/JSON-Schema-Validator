@@ -20,6 +20,6 @@ class Validator(ABC):
         pass
 
     @staticmethod
-    def get_line(json_map, path_json, is_key: bool):
+    def get_line(json_map, path_json):
         location = json_map[path_json]
-        return location.key_start.line if is_key and path_json != "" else location.value_start.line
+        return location.key_start.line if location.key_start else location.value_start.line

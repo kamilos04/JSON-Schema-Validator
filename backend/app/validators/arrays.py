@@ -33,7 +33,7 @@ class ArrayValidator(Validator):
             item_schema = schema["items"]
 
             for index, item in enumerate(data):
-                result = self.json_validator.validate(data=item, schema=item_schema, path=f"{path}[{index}]", path_json=path_json, json_map=json_map)
+                result = self.json_validator.validate(data=item, schema=item_schema, path=path+"/items", path_json=path_json+f"/{index}", json_map=json_map)
                 if not result["valid"]:
                     errors.extend(result["errors"])
 
@@ -41,14 +41,14 @@ class ArrayValidator(Validator):
             errors.append({
                 "message": f"Array length ({len(data)}) is smaller than minItems ({schema['minItems']})",
                 "path": path+"/minItems",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         if "maxItems" in schema and len(data) > schema["maxItems"]:
             errors.append({
                 "message": f"Array length ({len(data)}) is bigger than maxItems ({schema['maxItems']})",
                 "path": path+"/maxItems",
-                "line": self.get_line(json_map, path_json, True)
+                "line": self.get_line(json_map, path_json)
             })
 
         return {"valid": not errors, "errors": errors}
