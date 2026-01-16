@@ -1,24 +1,39 @@
+import json
 from backend.app.dependencies import json_validator
-
+from json_source_map import calculate
 
 # Test
-schema = {
+schema = """
+{
   "type": "object",
-  "required": ["name", "age"],
+  "required": [
+    "name",
+    "age"
+  ],
   "minProperties": 3,
   "maxProperties": 3,
   "properties": {
-    "name": { "type": "string", "minLength": 4, "maxLength": 7 },
-    "age": { "type": "integer" }
+    "name": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 7
+    },
+    "age": {
+      "type": "integer",
+      "minimum": 12
+    }
   }
 }
+"""
 
-json_data = {
+json_data = """
+{
   "name": "Ka",
-  "age": 21,
+  "age": 11,
   "test": 1,
   "test2": 2
 }
+"""
 
 # schema = {
 #     "type": "object",
@@ -46,7 +61,8 @@ json_data = {
 #     }
 # }
 
-
-json_result = json_validator.validate(json_data, schema, "")
-print(json_result)
+json_dict = json.loads(json_data)
+schema_dict = json.loads(schema)
+json_map = calculate(json_data)
+print(json_validator.validate(json_dict, schema_dict, "#", "", json_map))
 
