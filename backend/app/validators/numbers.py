@@ -7,12 +7,14 @@ from typing import Any, Dict, List
 import math
 
 class NumberValidator(Validator):
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
+    def validate(self, data: Any, schema: Dict, path: str, path_json: str, json_map) -> Result:
         logging.debug("Validating number")
         logging.debug("Data:")
         logging.debug(data)
         logging.debug("Schema:")
         logging.debug(schema)
+        logging.debug("Path json:")
+        logging.debug(path_json)
         logging.debug("\n\n")
 
         errors: List[Dict] = []
@@ -22,7 +24,7 @@ class NumberValidator(Validator):
             errors.append({
                 "message": "Data is not a valid finite number",
                 "path": path,
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
             return {"valid": False, "errors": errors}
 
@@ -30,35 +32,35 @@ class NumberValidator(Validator):
             errors.append({
                 "message": f"Number ({data}) is smaller than minimum ({schema['minimum']})",
                 "path": path+"/minimum",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
 
         if "maximum" in schema and data > schema["maximum"]:
             errors.append({
                 "message": f"Number ({data}) is bigger than maximum ({schema['maximum']})",
                 "path": path+"/maximum",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
 
         if "exclusiveMinimum" in schema and data <= schema["exclusiveMinimum"]:
             errors.append({
                 "message": f"Number ({data}) is smaller or equal than exclusiveMinimum ({schema['exclusiveMinimum']})",
                 "path": path+"/exclusiveMinimum",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
 
         if "exclusiveMaximum" in schema and data >= schema["exclusiveMaximum"]:
             errors.append({
                 "message": f"Number ({data}) is bigger or equal than exclusiveMaximum ({schema['exclusiveMaximum']})",
                 "path": path+"/exclusiveMaximum",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
 
         if "multipleOf" in schema and data % schema["multipleOf"] != 0:
             errors.append({
                 "message": f"Number ({data}) is not a multipleOf ({schema['multipleOf']})",
                 "path": path+"/multipleOf",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
 
         return {"valid": not errors, "errors": errors}

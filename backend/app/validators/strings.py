@@ -7,12 +7,14 @@ import re
 
 
 class StringValidator(Validator):
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0)  -> Result:
+    def validate(self, data: Any, schema: Dict, path: str, path_json: str, json_map)  -> Result:
         logging.debug("Validating string")
         logging.debug("Data:")
         logging.debug(data)
         logging.debug("Schema:")
         logging.debug(schema)
+        logging.debug("Path json:")
+        logging.debug(path_json)
         logging.debug("\n\n")
 
         errors: List[Dict] = []
@@ -21,7 +23,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": "Data is not a string",
                 "path": path,
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
             logging.info("\nData is not a string\n")
             return {"valid": False, "errors": errors}
@@ -30,7 +32,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": f"String length ({len(data)}) < minLength ({schema['minLength']})",
                 "path": path+"/minLength",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
             logging.info(f"\nString length ({len(data)}) < minLength ({schema['minLength']})\n")
 
@@ -38,7 +40,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": f"String length ({len(data)}) > maxLength ({schema['maxLength']})",
                 "path": path+"/maxLength",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
             logging.info(f"\nString length ({len(data)}) > maxLength ({schema['maxLength']})\n")
 
@@ -46,7 +48,7 @@ class StringValidator(Validator):
             errors.append({
                 "message": f"String '{data}' does not match pattern {schema['pattern']}",
                 "path": path+"/pattern",
-                "line": line
+                "line": self.get_line(json_map, path_json, True)
             })
             logging.info(f"\nString '{data}' does not match pattern {schema['pattern']}\n")
 
