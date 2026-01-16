@@ -6,6 +6,10 @@ from typing import Any, Dict, List
 
 
 class ArrayValidator(Validator):
+    def __init__(self, json_validator):
+        self.json_validator = json_validator
+
+
     def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
         logging.debug("Validating array")
         logging.debug("Data:")
