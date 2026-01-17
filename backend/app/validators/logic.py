@@ -106,12 +106,34 @@ class LogicValidator(Validator):
                 })
 
         if "if" in schema:
-            pass
+            if_schema = schema["if"]
+            then_schema = schema.get("then")
+            else_schema = schema.get("else")
 
-        if "then" in schema:
-            pass
+            if_result = self.json_validator.validate(
+                data = data,
+                schema=if_schema,
+                path=path,
+                path_json=path_json,
+                json_map=json_map)
 
-        if "else" in schema:
-            pass
+            if if_result["valid"] and then_schema:
+                then_result = self.json_validator.validate(
+                    data = data,
+                    schema=then_schema,
+                    path=path,
+                    path_json=path_json,
+                    json_map=json_map)
+                if not then_result["valid"]:
+                    errors.extend(then_result["errors"])
+            elif not if_result["valid"] and else_schema:
+                else_result = self.json_validator.validate(
+                    data = data,
+                    schema=else_schema,
+                    path=path,
+                    path_json=path_json,
+                    json_map=json_map)
+                if not else_result["valid"]:
+                    errors.extend(else_result["errors"])
 
         return {"valid": not errors, "errors": errors}

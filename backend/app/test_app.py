@@ -5,28 +5,37 @@ from json_source_map import calculate
 # Test
 schema = """
 {
-    "oneOf": [
-        {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "minLength": 4}
-            }
-        },
-        {
-            "type": "object",
-            "properties": {
-                "age": {"type": "integer", "minimum": 18}
-            }
+    "type": "object",
+    "required": ["age", "can_vote"],
+    "properties": {
+        "age": {"type": "integer"},
+        "can_vote": {"type": "boolean"}
+    },
+    "if": {
+        "type": "object",
+        "properties": {
+            "age": {"type": "integer", "minimum": 18}
         }
-    ]
+    },
+    "then": {
+        "type": "object",
+        "properties": {
+            "can_vote": {"type": "boolean", "const": true}
+        }
+    },
+    "else": {
+        "type": "object",
+        "properties": {
+            "can_vote": {"type": "boolean", "const": false}
+        }
+    }
 }
 """
 
 json_data = """
 {
-  "name": "Ka",
-  "age": 11
-
+    "age": 20,
+    "can_vote": false
 }
 """
 
