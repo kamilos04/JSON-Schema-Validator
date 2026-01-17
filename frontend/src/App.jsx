@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -22,20 +22,47 @@ export default function App() {
   const [valid, setValid] = useState(null)
   const [apiError, setApiError] = useState("")
 
+  const monacoRef = useRef(null)
+  const editorRef = useRef(null)
+
+  function handleEditorDidMount(editor, monaco) {
+    editorRef.current = editor
+    monacoRef.current = monaco
+  }
+
+  const updateEditorMarkers = (validationErrors) => {
+    if (!monacoRef.current || !editorRef.current) return
+
+    const model = editorRef.current.getModel()
+    if (!model) return
+
+    const markers = validationErrors
+      .filter((err) => typeof err.line === "number")
+      .map((err) => ({
+        startLineNumber: err.line,
+        startColumn: 1,
+        endLineNumber: err.line,
+        endColumn: model.getLineMaxColumn(err.line),
+        message: err.message,
+        severity: monacoRef.current.MarkerSeverity.Error,
+      }))
+
+    monacoRef.current.editor.setModelMarkers(model, "json-validation", markers)
+  }
+
   const handleValidate = async () => {
     setApiError("")
     setValid(null)
-
     const nextErrors = []
 
     if (!schema.trim()) nextErrors.push({ path: "schema", message: "Schema is empty" })
     if (!data.trim()) nextErrors.push({ path: "data", message: "Data is empty" })
 
-    const s = schema.trim() ? safeJsonParse(schema) : null
-    const d = data.trim() ? safeJsonParse(data) : null
+    const sCheck = schema.trim() ? safeJsonParse(schema) : null
+    const dCheck = data.trim() ? safeJsonParse(data) : null
 
-    if (s && !s.ok) nextErrors.push({ path: "schema", message: s.message })
-    if (d && !d.ok) nextErrors.push({ path: "data", message: d.message })
+    if (sCheck && !sCheck.ok) nextErrors.push({ path: "schema", message: sCheck.message })
+    if (dCheck && !dCheck.ok) nextErrors.push({ path: "data", message: dCheck.message })
 
     if (nextErrors.length > 0) {
       setErrors(nextErrors)
@@ -50,8 +77,8 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          json: JSON.stringify(d.value),
-          schema: JSON.stringify(s.value),
+          json: data, 
+          schema: schema,
         }),
       })
 
@@ -61,21 +88,22 @@ export default function App() {
       }
 
       const result = await res.json()
-
       setValid(!!result.valid)
 
       if (result.valid) {
         setErrors([])
+        updateEditorMarkers([])
       } else {
         const apiErrors = Array.isArray(result.errors)
           ? result.errors.map((e) => ({
               path: e.path ?? "",
               message: e.message ?? "Validation error",
-              line: e.line,
+              line: typeof e.line === "number" ? e.line + 1 : undefined,
             }))
           : [{ path: "", message: "Unknown validation error" }]
 
         setErrors(apiErrors)
+        updateEditorMarkers(apiErrors)
       }
     } catch (e) {
       setApiError(e?.message ?? "Network error")
@@ -99,18 +127,33 @@ export default function App() {
               language="json"
               value={schema}
               onChange={(v) => setSchema(v ?? "")}
-              options={{ minimap: { enabled: false } }}
+              options={{ 
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true
+              }}
             />
           </div>
 
           <div className="space-y-2">
             <Label>JSON Data</Label>
             <Editor
-              height="200px"
+              height="250px"
               language="json"
               value={data}
-              onChange={(v) => setData(v ?? "")}
-              options={{ minimap: { enabled: false } }}
+              onMount={handleEditorDidMount}
+              onChange={(v) => {
+                setData(v ?? "")
+                if (monacoRef.current && editorRef.current) {
+                  monacoRef.current.editor.setModelMarkers(editorRef.current.getModel(), "json-validation", [])
+                }
+              }}
+              options={{ 
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                glyphMargin: true 
+              }}
             />
           </div>
 
@@ -142,9 +185,11 @@ export default function App() {
           )}
 
           {valid === true && (
-            <Alert>
-              <AlertTitle>OK</AlertTitle>
-              <AlertDescription>JSON is valid against schema.</AlertDescription>
+            <Alert className="bg-green-50 border-green-200">
+              <AlertTitle className="text-green-800">OK</AlertTitle>
+              <AlertDescription className="text-green-700">
+                JSON is valid against schema.
+              </AlertDescription>
             </Alert>
           )}
         </CardContent>
