@@ -7,7 +7,7 @@ from backend.app.types import Result
 class Validator(ABC):
 
     @abstractmethod
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
+    def validate(self, data: Any, schema: Dict, path: str, path_json: str, json_map) -> Result:
 
 
         """
@@ -18,3 +18,8 @@ class Validator(ABC):
              }
         """
         pass
+
+    @staticmethod
+    def get_line(json_map, path_json, is_key: bool):
+        location = json_map[path_json]
+        return location.key_start.line if is_key and path_json != "" else location.value_start.line
