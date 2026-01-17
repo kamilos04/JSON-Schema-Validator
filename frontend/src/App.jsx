@@ -30,9 +30,18 @@ export default function App() {
     monacoRef.current = monaco
   }
 
+  const handleFileDrop = (e, setter) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file && (file.type === "application/json" || file.name.endsWith(".json"))) {
+      const reader = new FileReader()
+      reader.onload = (event) => setter(event.target.result)
+      reader.readAsText(file)
+    }
+  }
+
   const updateEditorMarkers = (validationErrors) => {
     if (!monacoRef.current || !editorRef.current) return
-
     const model = editorRef.current.getModel()
     if (!model) return
 
@@ -76,10 +85,7 @@ export default function App() {
       const res = await fetch("/api/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          json: data, 
-          schema: schema,
-        }),
+        body: JSON.stringify({ json: data, schema: schema }),
       })
 
       if (!res.ok) {
@@ -96,11 +102,12 @@ export default function App() {
       } else {
         const apiErrors = Array.isArray(result.errors)
           ? result.errors.map((e) => ({
-              path: e.path ?? "",
+              path: e.path && e.path !== "#" ? e.path : "Root object",
               message: e.message ?? "Validation error",
-              line: typeof e.line === "number" ? e.line + 1 : undefined,
+              line: typeof e.line === "number" ? e.line + 1 : 1,
+              isGlobal: typeof e.line !== "number"
             }))
-          : [{ path: "", message: "Unknown validation error" }]
+          : [{ path: "System", message: "Unknown error", line: 1, isGlobal: true }]
 
         setErrors(apiErrors)
         updateEditorMarkers(apiErrors)
@@ -113,70 +120,79 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-8">
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
+    <div className="min-h-screen bg-slate-100 p-8 text-slate-900">
+      <Card className="max-w-4xl mx-auto shadow-lg">
+        <CardHeader className="border-b mb-4">
           <CardTitle>JSON Schema Validator</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label>JSON Schema</Label>
-            <Editor
-              height="200px"
-              language="json"
-              value={schema}
-              onChange={(v) => setSchema(v ?? "")}
-              options={{ 
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true
-              }}
-            />
+          <div 
+            className="space-y-2 group transition-all"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleFileDrop(e, setSchema)}
+          >
+            <div className="flex justify-between items-center">
+              <Label className="font-bold">JSON Schema</Label>
+              <span className="text-[10px] uppercase text-slate-400 group-hover:text-blue-500 transition-colors">Drag & drop JSON file</span>
+            </div>
+            <div className="border rounded-md overflow-hidden focus-within:ring-2 ring-blue-500">
+              <Editor
+                height="200px"
+                language="json"
+                value={schema}
+                onChange={(v) => setSchema(v ?? "")}
+                options={{ minimap: { enabled: false }, scrollBeyondLastLine: false, automaticLayout: true }}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>JSON Data</Label>
-            <Editor
-              height="250px"
-              language="json"
-              value={data}
-              onMount={handleEditorDidMount}
-              onChange={(v) => {
-                setData(v ?? "")
-                if (monacoRef.current && editorRef.current) {
-                  monacoRef.current.editor.setModelMarkers(editorRef.current.getModel(), "json-validation", [])
-                }
-              }}
-              options={{ 
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                glyphMargin: true 
-              }}
-            />
+          <div 
+            className="space-y-2 group transition-all"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleFileDrop(e, setData)}
+          >
+            <div className="flex justify-between items-center">
+              <Label className="font-bold">JSON Data</Label>
+              <span className="text-[10px] uppercase text-slate-400 group-hover:text-blue-500 transition-colors">Drag & drop JSON file</span>
+            </div>
+            <div className="border rounded-md overflow-hidden focus-within:ring-2 ring-blue-500">
+              <Editor
+                height="250px"
+                language="json"
+                value={data}
+                onMount={handleEditorDidMount}
+                onChange={(v) => {
+                  setData(v ?? "")
+                  if (monacoRef.current && editorRef.current) {
+                    monacoRef.current.editor.setModelMarkers(editorRef.current.getModel(), "json-validation", [])
+                  }
+                }}
+                options={{ minimap: { enabled: false }, scrollBeyondLastLine: false, automaticLayout: true, glyphMargin: true }}
+              />
+            </div>
           </div>
 
-          <Button className="w-full" onClick={handleValidate} disabled={loading}>
-            {loading ? "Validating..." : "Validate"}
+          <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white h-12" onClick={handleValidate} disabled={loading}>
+            {loading ? "Validating..." : "Validate JSON"}
           </Button>
 
           {apiError && (
             <Alert variant="destructive">
-              <AlertTitle>API error</AlertTitle>
+              <AlertTitle>API Error</AlertTitle>
               <AlertDescription>{apiError}</AlertDescription>
             </Alert>
           )}
 
           {errors.length > 0 && (
-            <Alert variant="destructive">
-              <AlertTitle>Validation errors</AlertTitle>
+            <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
+              <AlertTitle>Validation Errors</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-5">
+                <ul className="list-disc pl-5 mt-2 space-y-1">
                   {errors.map((err, i) => (
-                    <li key={i}>
-                      <strong>{err.path || "(root)"}</strong>: {err.message}
-                      {typeof err.line === "number" ? ` (line: ${err.line})` : ""}
+                    <li key={i} className="text-sm">
+                      <span className="font-mono font-bold bg-slate-100 px-1 rounded">{err.path}</span>: {err.message} 
+                      <span className="text-slate-500 ml-2">(line {err.line})</span>
                     </li>
                   ))}
                 </ul>
@@ -185,11 +201,9 @@ export default function App() {
           )}
 
           {valid === true && (
-            <Alert className="bg-green-50 border-green-200">
-              <AlertTitle className="text-green-800">OK</AlertTitle>
-              <AlertDescription className="text-green-700">
-                JSON is valid against schema.
-              </AlertDescription>
+            <Alert className="bg-emerald-50 border-emerald-200 text-emerald-800 animate-in zoom-in-95">
+              <AlertTitle className="font-bold">Success</AlertTitle>
+              <AlertDescription>The JSON data is perfectly valid against the provided schema.</AlertDescription>
             </Alert>
           )}
         </CardContent>

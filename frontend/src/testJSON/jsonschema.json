@@ -1,0 +1,41 @@
+{
+    "type": "object",
+    "required": [
+      "name",
+      "age",
+      "hobbies"
+    ],
+    "minProperties": 3,
+    "maxProperties": 4,
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 7
+      },
+      "age": {
+        "type": "integer",
+        "minimum": 12
+      },
+      "hobbies": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+          "type": "string",
+          "minLength": 3
+        }
+      },
+      "city": {
+        "type": "object",
+        "required": [
+          "country"
+          ],
+        "properties": {
+          "country": {
+            "type": "string"    
+          }
+        },
+        "additionalProperties": { "type": "number" }
+      }
+    }
+  }
