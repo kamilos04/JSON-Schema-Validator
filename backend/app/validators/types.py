@@ -36,12 +36,14 @@ class TypeValidator(Validator):
 
         return False
 
-    def validate(self, data: Any, schema: Dict, path: str, line: int = 0) -> Result:
+    def validate(self, data: Any, schema: Dict, path: str, path_json: str, json_map) -> Result:
         logging.debug("Validating type")
         logging.debug("Data:")
         logging.debug(data)
         logging.debug("Schema:")
         logging.debug(schema)
+        logging.debug("Path json:")
+        logging.debug(path_json)
         logging.debug("\n\n")
 
         errors: List[Dict] = []
@@ -54,23 +56,23 @@ class TypeValidator(Validator):
             if not any(self.matches_type(data, t) for t in allowed_types):
                 errors.append({
                     "message": "Data does not match any of the allowed types",
-                    "path": path,
-                    "line": line
+                    "path": path+"/type",
+                    "line": self.get_line(json_map, path_json)
                 })
         if "enum" in schema:
             if not any(item == data and type(item) is type(data) for item in schema["enum"]):
                 errors.append({
                     "message": "Data does not match any of the enum values",
-                    "path": path,
-                    "line": line
+                    "path": path+"/enum",
+                    "line": self.get_line(json_map, path_json)
                 })
 
         if "const" in schema:
             if not (data == schema["const"] and type(data) is type(schema["const"])):
                 errors.append({
                     "message": "Data does not match the const value",
-                    "path": path,
-                    "line": line
+                    "path": path+"/const",
+                    "line": self.get_line(json_map, path_json)
                 })
-                
+
         return {"valid": not errors, "errors": errors}

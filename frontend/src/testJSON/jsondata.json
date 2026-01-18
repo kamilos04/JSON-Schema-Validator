@@ -1,0 +1,9 @@
+{
+    "name": "Ka",
+    "age": 11,
+    "hobbies": ["ai","bc"],
+    "city": {
+      "country": "test",
+      "test2": "f"},
+    "test": 1
+  }
