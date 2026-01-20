@@ -14,11 +14,11 @@ class LogicValidator(Validator):
         if "allOf" in schema:
             subschemas = schema["allOf"]
 
-            for subschema in subschemas:
+            for index, subschema in enumerate(subschemas):
                 result = self.json_validator.validate(
                     data=data,
                     schema=subschema,
-                    path=path,
+                    path=path + f"/allOf/{index}",
                     path_json=path_json,
                     json_map=json_map
                 )
@@ -31,13 +31,13 @@ class LogicValidator(Validator):
             any_valid = False
             anyof_errors : List[Dict] = []
 
-            for subschema in subschemas:
+            for index, subschema in enumerate(subschemas):
                 result = self.json_validator.validate(
                     data=data,
                     schema=subschema,
-                    path=path,
+                    path=path + f"/anyOf/{index}",
                     path_json=path_json,
-                    json_map=json_map                )
+                    json_map=json_map)
 
                 if result["valid"]:
                     any_valid = True
@@ -48,8 +48,8 @@ class LogicValidator(Validator):
             if not any_valid:
                 errors.append({
                     "message": "Data does not match anyOf schemas",
-                    "path": path,
-                    "line": self.get_line(json_map, path_json, True),
+                    "path": path + "/anyOf",
+                    "line": self.get_line(json_map, path_json),
                     "details": anyof_errors
                 })
 
@@ -59,11 +59,11 @@ class LogicValidator(Validator):
             more_than_one_valid = False
             oneof_errors: List[Dict] = []
 
-            for subschema in subschemas:
+            for index, subschema in enumerate(subschemas):
                 result = self.json_validator.validate(
                     data=data,
                     schema=subschema,
-                    path=path,
+                    path=path + f"/oneOf/{index}",
                     path_json=path_json,
                     json_map=json_map)
 
@@ -78,15 +78,15 @@ class LogicValidator(Validator):
             if not one_valid:
                 errors.append({
                     "message": "Data does not match oneOf schemas",
-                    "path": path,
-                    "line": self.get_line(json_map, path_json, True),
+                    "path": path + "/oneOf",
+                    "line": self.get_line(json_map, path_json),
                     "details": oneof_errors
                 })
             if more_than_one_valid:
                 errors.append({
                     "message": "Data matches more than one oneOf schema",
-                    "path": path,
-                    "line": self.get_line(json_map, path_json, True),
+                    "path": path + "/oneOf",
+                    "line": self.get_line(json_map, path_json),
                 })
 
 
@@ -94,15 +94,15 @@ class LogicValidator(Validator):
             result = self.json_validator.validate(
                 data=data,
                 schema=schema["not"],
-                path=path,
+                path=path + "/not",
                 path_json=path_json,
                 json_map=json_map)
 
             if result["valid"]:
                 errors.append({
                     "message": "Data matches not schema",
-                    "path": path,
-                    "line": self.get_line(json_map, path_json, True),
+                    "path": path + "/not",
+                    "line": self.get_line(json_map, path_json),
                 })
 
         if "if" in schema:
@@ -113,7 +113,7 @@ class LogicValidator(Validator):
             if_result = self.json_validator.validate(
                 data = data,
                 schema=if_schema,
-                path=path,
+                path=path + "/if",
                 path_json=path_json,
                 json_map=json_map)
 
@@ -121,7 +121,7 @@ class LogicValidator(Validator):
                 then_result = self.json_validator.validate(
                     data = data,
                     schema=then_schema,
-                    path=path,
+                    path=path + "/then",
                     path_json=path_json,
                     json_map=json_map)
                 if not then_result["valid"]:
@@ -130,7 +130,7 @@ class LogicValidator(Validator):
                 else_result = self.json_validator.validate(
                     data = data,
                     schema=else_schema,
-                    path=path,
+                    path=path + "/else",
                     path_json=path_json,
                     json_map=json_map)
                 if not else_result["valid"]:
