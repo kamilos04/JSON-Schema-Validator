@@ -1,0 +1,37 @@
+# Typy danych
+type
+enum
+const
+
+# Walidacja obiektów
+properties
+required
+additionalProperties
+minProperties
+maxProperties
+
+# Walidacja tablic
+items
+minItems
+maxItems
+
+# Walidacja stringów
+minLength
+maxLength
+pattern
+
+# Walidacja liczb
+minimum
+maximum
+exclusiveMinimum
+exclusiveMaximum
+multipleOf
+
+# Operatory logiczne
+allOf
+anyOf
+oneOf
+not
+if
+then
+else
