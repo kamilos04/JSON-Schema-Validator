@@ -10,7 +10,6 @@ def validate_request(schema, data):
         "json": json.dumps(data)
     }
     response = requests.post(API_URL, json=payload)
-    print(response.json())
     return response
 
 def test_types_enum_const():
