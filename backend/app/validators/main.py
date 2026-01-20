@@ -22,17 +22,16 @@ class JSONValidator(Validator):
         if not type_result["valid"]:
             return type_result
 
-        schema_type = schema.get("type")
-        if schema_type == "object":
+        base_result = {"valid": True, "errors": []}
+
+        if isinstance(data, dict):
             base_result = self.object_validator.validate(data, schema, path, path_json, json_map)
-        elif schema_type == "array":
+        elif isinstance(data, list):
             base_result = self.array_validator.validate(data, schema, path, path_json, json_map)
-        elif schema_type == "string":
+        elif isinstance(data, str):
             base_result = self.string_validator.validate(data, schema, path, path_json, json_map)
-        elif schema_type in ["integer", "number"]:
+        elif isinstance(data, (int, float)) and not isinstance(data, bool):
             base_result = self.number_validator.validate(data, schema, path, path_json, json_map)
-        else:
-            base_result = {"valid": True, "errors": []}
 
         logic_result = self.logic_validator.validate(data, schema, path, path_json, json_map)
 
