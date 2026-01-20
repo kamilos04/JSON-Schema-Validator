@@ -8,15 +8,6 @@ class Validator(ABC):
 
     @abstractmethod
     def validate(self, data: Any, schema: Dict, path: str, path_json: str, json_map) -> Result:
-
-
-        """
-             Dict:
-             {
-             "valid": bool,
-             "errors": list[{"message", "path", "line"}]
-             }
-        """
         pass
 
     @staticmethod

@@ -44,10 +44,10 @@ class StringValidator(Validator):
             })
             logging.info(f"\nString length ({len(data)}) > maxLength ({schema['maxLength']})\n")
 
-        if "pattern" in schema and not re.match(schema["pattern"], data):
+        if "pattern" in schema and isinstance(data, str) and not re.search(schema["pattern"], data):
             errors.append({
                 "message": f"String '{data}' does not match pattern {schema['pattern']}",
-                "path": path+"/pattern",
+                "path": path + "/pattern",
                 "line": self.get_line(json_map, path_json)
             })
             logging.info(f"\nString '{data}' does not match pattern {schema['pattern']}\n")
