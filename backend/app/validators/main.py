@@ -9,15 +9,19 @@ class JSONValidator(Validator):
 
     def __init__(self, type_validator, object_validator, array_validator, string_validator, number_validator, logic_validator):
         self.type_validator = type_validator
+        self.object_validator = object_validator
+        self.array_validator = array_validator
+        self.string_validator = string_validator
+        self.number_validator = number_validator
         self.logic_validator = logic_validator
 
         self.dispatcher = ValidatorDispatcher()
-        self.dispatcher.register(lambda d: isinstance(d, dict), object_validator)
-        self.dispatcher.register(lambda d: isinstance(d, list), array_validator)
-        self.dispatcher.register(lambda d: isinstance(d, str), string_validator)
+        self.dispatcher.register(lambda d: isinstance(d, dict), lambda: self.object_validator)
+        self.dispatcher.register(lambda d: isinstance(d, list), lambda: self.array_validator)
+        self.dispatcher.register(lambda d: isinstance(d, str), lambda: self.string_validator)
         self.dispatcher.register(
             lambda d: isinstance(d, (int, float)) and not isinstance(d, bool), 
-            number_validator
+            lambda: self.number_validator
         )
 
 
